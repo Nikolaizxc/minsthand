@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+
 
 
 def village(seed):
@@ -23,7 +23,7 @@ def village(seed):
             points[id][1] -= 0.5
             ans.append(0)
         cnt+=1
-    return np.column_stack((points, ans))
+    return (points, ans)
 
 def xor(seed):
     seed = np.random.default_rng(seed)
@@ -33,7 +33,7 @@ def xor(seed):
     for i in points:
         
         ans.append(int((i[0]*i[1])>0))
-    return np.column_stack((points, ans))
+    return (points, ans)
 def ring(seed):
     seed = np.random.default_rng(seed)
     points = np.array(seed.uniform(0, 1, 2000))
@@ -52,7 +52,7 @@ def ring(seed):
             points[id][0] = ((a * np.sin(i[1]*10000)))
             points[id][1] = ((a * np.cos(i[1]*10000)))
 
-    return np.column_stack((points, ans))
+    return (points, ans)
 def spray(seed):
     seed2 = np.random.default_rng(seed+1)
     seed = np.random.default_rng(seed)
@@ -80,13 +80,15 @@ def spray(seed):
 
         
 
-    return np.column_stack((points, ans))
+    return (points, ans)
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
     x,y,x1,y1 = [],[],[],[]
-    points = spray(1)
-    for i in points:
-        if i[2]:
+    
+    points, ans = xor(1)
+    for id, i in enumerate(points):
+        if ans[id]:
             x.append(i[0])
             y.append(i[1])
         else:
