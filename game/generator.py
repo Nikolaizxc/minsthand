@@ -86,7 +86,7 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     x,y,x1,y1 = [],[],[],[]
     
-    points, ans = xor(1)
+    points, ans = spray(1)
     for id, i in enumerate(points):
         if ans[id]:
             x.append(i[0])
