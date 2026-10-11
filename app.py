@@ -3,6 +3,10 @@ import knn
 from PIL import Image, ImageGrab
 import numpy as np
 import matplotlib.pyplot as plt
+import percepthrone as pt
+data = np.load("weights_for_MNIST.npz")
+b = [data[k] for k in data.files]     #  список из шести массивов для передачи в форвард(готовые веса)
+
 import sys
 if sys.platform == "win32":
     try:
@@ -20,6 +24,87 @@ root.geometry("400x600")
 history = []
 global r
 r = 5
+def percepthrone(event):
+    root.update()
+    x = root.winfo_rootx()+canvas.winfo_x()+2
+    y = root.winfo_rooty()+canvas.winfo_y()+2
+    x1 = x + 280 - 2
+    y1 = y + 280 - 2
+    
+    img = ImageGrab.grab(bbox=(x, y, x1, y1))
+    img = img.resize((28,28), Image.Resampling.BOX)
+    img = img.convert("L")
+    img = np.array(img)
+
+    img = img.astype(np.float32)/255.0
+    img = img.reshape(28,28)
+    cnt = 0
+    sum_x = 0
+    sum_y = 0
+    S, N, W, E = 0,-1,-1, 0
+    for i in img:
+    
+
+        if max(i) > 0.1:
+            #print(max(i), cnt, N, S)
+            if N==-1:
+
+                N = cnt
+            S = cnt
+        cnt+=1
+
+    img = img.T
+    cnt = 0
+    for i in img:
+        
+        if max(i) > 0.1:
+            if W == -1:
+                W = cnt
+            E = cnt
+        cnt+=1
+    s = []
+    
+    #plt.imshow(img, cmap='grey')
+    #plt.show()
+
+    for cnt, i in enumerate(img.T):
+        if N <= cnt <= S:
+            s.append(i[W:E+1])
+    s = np.array(s)
+    #plt.imshow(s, cmap='grey')
+    #plt.show()
+    x_index = np.arange(s.shape[1])
+    y_index= np.arange(s.shape[0])
+    sum_x = np.sum(s.sum(axis=0) * x_index) / np.sum(s)
+    sum_y = np.sum(s.sum(axis=1) * y_index) / np.sum(s)
+    sum_x = int(sum_x) if abs(int(sum_x) - sum_x) < 0.5 else int(sum_x) + 1
+    sum_y = int(sum_y) if abs(int(sum_y) - sum_y) < 0.5 else int(sum_y) + 1
+    ss = np.zeros((28, s.shape[1]))
+    cnt = 0
+    z_x = 0
+    for i in range( 14 - sum_y, 14 - sum_y + s.shape[0]):
+        
+        ss[i] = s[cnt]
+        z_x += sum([t*t_c for t_c, t in enumerate(ss[i])])
+        cnt+=1
+    print(z_x / np.sum(ss))
+    sa = np.zeros((28, 28))
+    cnt = 0
+
+    for i in range( 14 - sum_x, 14 - sum_x + s.shape[1]):
+        
+        sa[i] = ss.T[cnt]
+
+        # plt.imshow(sa, cmap='gray')
+        # plt.show()
+        cnt+=1
+
+    img = sa.T
+    img = img.reshape(1,784)
+    ans = pt.softmax(pt.forward(img, b)[5]) [0]    
+    print([str(z) + " " + str(i) for z, i in enumerate(ans)] )
+    label_accuracy1["text"] = "Цифра: " + str(np.argmax(ans))
+    label_accuracy["text"] = "Точность: "+f"{max(ans):.2f}" + "%"
 def kn(event):
     root.update()
     x = root.winfo_rootx()+canvas.winfo_x()
@@ -107,5 +192,6 @@ canvas.bind('<ButtonRelease-1>', end)
 button_clear.bind('<Button-1>', cls)
 brush_size_scale.bind("<ButtonRelease-1>", on_release)
 button_recognize.bind('<Button-1>', kn)
+button_recognize2.bind('<Button-1>', percepthrone)
 
 root.mainloop()
